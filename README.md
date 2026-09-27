@@ -28,3 +28,11 @@ cp .env.example .env
 
 # 4. Iniciar en modo desarrollo
 npm run start:dev
+
+
+## 🔒 Políticas de Ramas y Contribución
+
+* `main`: Solo recibe cambios desde `develop` mediante Pull Requests aprobados y probados.
+* `develop`: Rama base de integración diaria.
+* `feature/*`: Ramas individuales para cada tarea (ej. `feature/login-jwt`).
+* **Regla de Oro:** Prohibido hacer `git push` directo a `main` o `develop`.
