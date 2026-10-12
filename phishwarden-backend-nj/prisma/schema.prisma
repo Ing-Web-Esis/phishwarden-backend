@@ -1,0 +1,180 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model campana_usuarios {
+  id            String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  campana_id    String?   @db.Uuid
+  usuario_id    String?   @db.Uuid
+  token_rastreo String?   @unique @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  campanas      campanas? @relation(fields: [campana_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  usuarios      usuarios? @relation(fields: [usuario_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([campana_id, usuario_id])
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model campanas {
+  id                 String               @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  plantilla_id       Int?
+  nombre             String               @db.VarChar(150)
+  fecha_programada   DateTime             @db.Timestamptz(6)
+  modalidad_envio    String?              @default("masivo") @db.VarChar(50)
+  estado             String?              @default("programada") @db.VarChar(20)
+  creado_el          DateTime?            @default(now()) @db.Timestamptz(6)
+  campana_usuarios   campana_usuarios[]
+  plantillas         plantillas?          @relation(fields: [plantilla_id], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  eventos_simulacion eventos_simulacion[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model departamentos {
+  id             Int        @id @default(autoincrement())
+  nombre         String     @unique @db.VarChar(100)
+  fecha_creacion DateTime?  @default(now()) @db.Timestamptz(6)
+  empresa_id     Int?
+  empresas       empresas?  @relation(fields: [empresa_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  usuarios       usuarios[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model empresas {
+  id              Int               @id @default(autoincrement())
+  nombre          String            @db.VarChar(150)
+  codigo_acceso   String            @unique @db.VarChar(20)
+  fecha_creacion  DateTime?         @default(now()) @db.Timestamptz(6)
+  administradores administradores[]
+  departamentos   departamentos[]
+  usuarios        usuarios[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model eventos_simulacion {
+  id             String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  usuario_id     String?   @db.Uuid
+  campana_id     String?   @db.Uuid
+  tipo_evento    String    @db.VarChar(50)
+  ip_anonimizada String?   @db.VarChar(45)
+  user_agent     String?
+  fecha_hora     DateTime? @default(now()) @db.Timestamptz(6)
+  campanas       campanas? @relation(fields: [campana_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  usuarios       usuarios? @relation(fields: [usuario_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model insignias_medallas {
+  id                Int                 @id @default(autoincrement())
+  nombre            String              @db.VarChar(100)
+  descripcion       String?
+  icono_url         String?
+  puntos_requeridos Int
+  medallas_usuarios medallas_usuarios[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model logros_usuarios {
+  id               Int             @id @default(autoincrement())
+  usuario_id       String?         @db.Uuid
+  microleccion_id  Int?
+  estado           String?         @db.VarChar(20)
+  puntos_obtenidos Int?            @default(0)
+  fecha_completado DateTime?       @default(now()) @db.Timestamptz(6)
+  microlecciones   microlecciones? @relation(fields: [microleccion_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  usuarios         usuarios?       @relation(fields: [usuario_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([usuario_id, microleccion_id])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model medallas_usuarios {
+  usuario_id         String             @db.Uuid
+  insignia_id        Int
+  fecha_obtencion    DateTime?          @default(now()) @db.Timestamptz(6)
+  insignias_medallas insignias_medallas @relation(fields: [insignia_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  usuarios           usuarios           @relation(fields: [usuario_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([usuario_id, insignia_id])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model microlecciones {
+  id                   Int                    @id @default(autoincrement())
+  metodo_ataque        String                 @db.VarChar(50)
+  titulo               String                 @db.VarChar(150)
+  contenido_multimedia String?
+  duracion_minutos     Int?                   @default(2)
+  puntos_recompensa    Int?                   @default(10)
+  logros_usuarios      logros_usuarios[]
+  preguntas_evaluacion preguntas_evaluacion[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model plantillas {
+  id                   Int        @id @default(autoincrement())
+  titulo               String     @db.VarChar(150)
+  metodo_ataque        String     @db.VarChar(50)
+  asunto               String?    @db.VarChar(200)
+  cuerpo_html          String
+  indicador_dificultad String?    @db.VarChar(20)
+  etiquetas_categoria  String?    @db.VarChar(100)
+  fecha_creacion       DateTime?  @default(now()) @db.Timestamptz(6)
+  campanas             campanas[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model preguntas_evaluacion {
+  id                 Int             @id @default(autoincrement())
+  microleccion_id    Int?
+  enunciado          String
+  opcion_a           String
+  opcion_b           String
+  opcion_c           String
+  opcion_d           String
+  respuesta_correcta String          @db.Char(1)
+  microlecciones     microlecciones? @relation(fields: [microleccion_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model usuarios {
+  id                      String               @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  departamento_id         Int?
+  nombre                  String               @db.VarChar(150)
+  correo_corporativo      String               @unique @db.VarChar(150)
+  numero_telefonico       String?              @db.VarChar(20)
+  token_notificacion_push String?
+  score_riesgo            Int?                 @default(100)
+  racha_dias_seguros      Int?                 @default(0)
+  estado                  String?              @default("activo") @db.VarChar(20)
+  fecha_registro          DateTime?            @default(now()) @db.Timestamptz(6)
+  empresa_id              Int?
+  campana_usuarios        campana_usuarios[]
+  eventos_simulacion      eventos_simulacion[]
+  logros_usuarios         logros_usuarios[]
+  medallas_usuarios       medallas_usuarios[]
+  departamentos           departamentos?       @relation(fields: [departamento_id], references: [id], onUpdate: NoAction)
+  empresas                empresas?            @relation(fields: [empresa_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model administradores {
+  id             Int       @id @default(autoincrement())
+  empresa_id     Int?
+  nombre         String    @db.VarChar(150)
+  correo         String    @unique @db.VarChar(150)
+  password_hash  String    @db.VarChar(255)
+  fecha_creacion DateTime? @default(now()) @db.Timestamptz(6)
+  empresas       empresas? @relation(fields: [empresa_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
