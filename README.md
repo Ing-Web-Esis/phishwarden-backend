@@ -38,8 +38,9 @@ Crear archivo .env y poner las credenciales de supabase
 npm run start:dev
 
 
-## 📖 Documentación de la API (Swagger)
-http://localhost:3000/api/docs
+## 🔒 Políticas de Ramas y Contribución
 
-
-
+* `main`: Solo recibe cambios desde `develop` mediante Pull Requests aprobados y probados.
+* `develop`: Rama base de integración diaria.
+* `feature/*`: Ramas individuales para cada tarea (ej. `feature/login-jwt`).
+* **Regla de Oro:** Prohibido hacer `git push` directo a `main` o `develop`.
