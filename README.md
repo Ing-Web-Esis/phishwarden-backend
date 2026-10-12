@@ -14,24 +14,32 @@ Servidor central desarrollado bajo **Arquitectura Hexagonal** encargado de la l�
 ## 👥 Integrantes Responsables
 * **Russell Jhean Paul Arratia Paz** - Backend & Ciberseguridad
 
+
+## 🔒 Políticas de Ramas y Contribución
+
+* **`main`: Solo recibe cambios desde `develop` mediante Pull Requests aprobados y probados.
+* **`develop`: Rama base de integración diaria.
+* **`feature/*`: Ramas individuales para cada tarea (ej. `feature/login-jwt`).
+* **Regla de Oro:** Prohibido hacer `git push` directo a `main` o `develop`.
+
 ## 🛠️ Instalación y Ejecución Local
 ```bash
 # 1. Clonar el repositorio
 git clone [https://github.com/TU-ORGANIZACION/phishwarden-backend.git](https://github.com/TU-ORGANIZACION/phishwarden-backend.git)
 cd phishwarden-backend
 
-# 2. Instalar dependencias
+# 2. Instalar dependencias (tener instaldo node.js versión 18 o superior)
 npm install
 
 # 3. Configurar variables de entorno (.env)
-cp .env.example .env
+Crear archivo .env y poner las credenciales de supabase
 
 # 4. Iniciar en modo desarrollo
 npm run start:dev
 
-## 🔒 Políticas de Ramas y Contribución
 
-* `main`: Solo recibe cambios desde `develop` mediante Pull Requests aprobados y probados.
-* `develop`: Rama base de integración diaria.
-* `feature/*`: Ramas individuales para cada tarea (ej. `feature/login-jwt`).
-* **Regla de Oro:** Prohibido hacer `git push` directo a `main` o `develop`.
+## 📖 Documentación de la API (Swagger)
+http://localhost:3000/api/docs
+
+
+
