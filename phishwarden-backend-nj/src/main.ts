@@ -6,8 +6,16 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Habilitar validaciones globales con class-validator
-  app.useGlobalPipes(new ValidationPipe());
+  // Habilitar validaciones y transformación automática de tipos globales
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
+    }),
+  );
 
   // Configuración de Swagger para documentar el Monolito Modular
   const config = new DocumentBuilder()
@@ -15,6 +23,8 @@ async function bootstrap() {
     .setDescription('Documentación de la API RESTful para la plataforma PhishWarden')
     .setVersion('1.0')
     .addTag('auth')
+    .addTag('empresas')
+    .addTag('empleados')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
