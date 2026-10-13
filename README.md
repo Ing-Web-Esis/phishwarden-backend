@@ -27,6 +27,7 @@ Servidor central desarrollado bajo **Arquitectura Hexagonal** encargado de la l√
 # 1. Clonar el repositorio
 git clone [https://github.com/TU-ORGANIZACION/phishwarden-backend.git](https://github.com/TU-ORGANIZACION/phishwarden-backend.git)
 cd phishwarden-backend
+cd phishwarder-backend-nj
 
 # 2. Instalar dependencias (tener instaldo node.js versi√≥n 18 o superior)
 npm install
