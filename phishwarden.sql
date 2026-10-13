@@ -7,6 +7,16 @@ CREATE TABLE empresas (
     fecha_creacion TIMESTAMPTZ DEFAULT NOW()
 );
 
+CREATE TABLE administradores (
+    id SERIAL PRIMARY KEY,
+    empresa_id INT REFERENCES empresas(id) ON DELETE CASCADE,
+    nombre VARCHAR(150) NOT NULL,
+    correo VARCHAR(150) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    fecha_creacion TIMESTAMPTZ DEFAULT NOW()
+);
+
+
 -- 1. MÓDULO DE GESTIÓN DE USUARIOS Y OBJETIVOS
 
 CREATE TABLE departamentos (
@@ -18,7 +28,6 @@ CREATE TABLE departamentos (
 
 CREATE TABLE usuarios (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    empresa_id INT REFERENCES empresas(id) ON DELETE CASCADE,
     departamento_id INT REFERENCES departamentos(id) ON DELETE SET NULL,
     nombre VARCHAR(150) NOT NULL,
     correo_corporativo VARCHAR(150) UNIQUE NOT NULL,
@@ -26,9 +35,10 @@ CREATE TABLE usuarios (
     token_notificacion_push TEXT, -- Para Firebase Cloud Messaging (FCM)
     score_riesgo INT DEFAULT 100 CHECK (score_riesgo BETWEEN 0 AND 100),
     racha_dias_seguros INT DEFAULT 0,
-    rol VARCHAR(20) CHECK (rol IN ('administrador', 'empleado')) DEFAULT 'empleado',
     estado VARCHAR(20) DEFAULT 'activo',
-    fecha_registro TIMESTAMPTZ DEFAULT NOW()
+    fecha_registro TIMESTAMPTZ DEFAULT NOW(),
+    empresa_id INT REFERENCES empresas(id) ON DELETE CASCADE,
+
 );
 
 -- 2. MÓDULO DE SIMULACIÓN DE ATAQUES
