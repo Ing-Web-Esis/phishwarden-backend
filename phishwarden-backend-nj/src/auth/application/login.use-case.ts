@@ -1,4 +1,5 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { AUTH_REPOSITORY } from './auth.repository.port';
 import type { AuthRepositoryPort } from './auth.repository.port';
 import * as bcrypt from 'bcrypt';
@@ -8,6 +9,7 @@ export class LoginUseCase {
   constructor(
     @Inject(AUTH_REPOSITORY)
     private readonly authRepository: AuthRepositoryPort,
+    private readonly jwtService: JwtService,
   ) {}
 
   async execute(data: { email: string; password?: string; codigoEmpresa?: string }) {
@@ -28,6 +30,10 @@ export class LoginUseCase {
       return {
         message: 'Acceso de administrador exitoso',
         user: { id: admin.id, email: admin.email, rol: admin.role },
+        access_token: await this.jwtService.signAsync({
+          sub: admin.id,
+          role: admin.role,
+        }),
       };
     }
 
@@ -51,5 +57,9 @@ export class LoginUseCase {
     }
 
     throw new UnauthorizedException('Faltan parámetros de autenticación');
+  }
+
+  async getAdminProfile(id: number) {
+    return this.authRepository.findAdminProfileById(id);
   }
 }

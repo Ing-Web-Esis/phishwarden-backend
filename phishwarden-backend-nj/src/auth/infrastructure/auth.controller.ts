@@ -1,7 +1,13 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Get, Req, UseGuards, UnauthorizedException } from '@nestjs/common';
 import { LoginUseCase } from '../application/login.use-case';
 import { LoginDto } from './login.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
+import { JwtAuthGuard } from './jwt-auth.guard';
+import type { Request } from 'express';
+
+type AuthenticatedRequest = Request & {
+  user: { sub: number };
+};
 
 @ApiTags('auth')
 @Controller('auth')
@@ -15,5 +21,18 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Credenciales inválidas o faltan parámetros.' })
   async login(@Body() loginDto: LoginDto) {
     return this.loginUseCase.execute(loginDto);
+  }
+
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Obtener el perfil del administrador autenticado' })
+  @ApiResponse({ status: 200, description: 'Perfil del administrador.' })
+  @ApiResponse({ status: 401, description: 'Token ausente, inválido o expirado.' })
+  async me(@Req() request: AuthenticatedRequest) {
+    const profile = await this.loginUseCase.getAdminProfile(request.user.sub);
+    if (!profile) {
+      throw new UnauthorizedException('Administrador no encontrado');
+    }
+    return profile;
   }
 }

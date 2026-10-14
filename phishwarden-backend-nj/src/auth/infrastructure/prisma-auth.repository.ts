@@ -7,7 +7,13 @@ import { PrismaService } from '../../prisma/prisma.service';
 export class PrismaAuthRepository implements AuthRepositoryPort {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findByEmail(email: string): Promise<any | null> {
+  async findByEmail(email: string): Promise<{
+    id: number;
+    email: string;
+    passwordHash: string;
+    role: string;
+    empresaId?: number;
+  } | null> {
     // Busca en la tabla exclusiva de administradores
     const admin = await (this.prisma as any).administradores.findFirst({
       where: { correo: email },
@@ -19,6 +25,24 @@ export class PrismaAuthRepository implements AuthRepositoryPort {
       passwordHash: admin.password_hash,
       role: 'administrador',
       empresaId: admin.empresa_id ?? undefined,
+    };
+  }
+
+  async findAdminProfileById(id: number) {
+    const admin = await this.prisma.administradores.findUnique({
+      where: { id },
+      include: { empresas: true },
+    });
+    if (!admin) return null;
+
+    return {
+      id: String(admin.id),
+      nombre: admin.nombre,
+      correo: admin.correo,
+      empresaId: admin.empresa_id,
+      empresa: admin.empresas
+        ? { id: admin.empresas.id, nombre: admin.empresas.nombre }
+        : null,
     };
   }
 
