@@ -5,6 +5,7 @@ import type {
   CreateEmployeeInput,
   UpdateEmployeeInput,
   PaginatedEmployeesResult,
+  EmployeeSummaryItem,
 } from '../application/employee.repository.port';
 import { DepartmentEntity } from '../domain/department.entity';
 import { EmployeeEntity } from '../domain/employee.entity';
@@ -229,11 +230,36 @@ export class PrismaEmployeeRepository implements EmployeeRepositoryPort {
     return true;
   }
 
-  async findSummaryByCompany(companyId: number) {
-    if (!this.userModel) return [];
+async findSummaryByCompany(
+  companyId: number,
+  page: number,
+  limit: number,
+  search?: string,
+) {
+  const pageNum = Number(page) || 1;
+  const limitNum = Number(limit) || 10;
 
-    const users = await this.userModel.findMany({
-      where: { empresa_id: companyId },
+  const model = (this.prisma as any).usuarios;
+  if (!model) {
+    return { data: [], total: 0, page: pageNum, limit: limitNum };
+  }
+
+  const where: any = { empresa_id: companyId };
+
+  if (search) {
+    where.OR = [
+      { nombre: { contains: search, mode: 'insensitive' } },
+      { correo_corporativo: { contains: search, mode: 'insensitive' } },
+    ];
+  }
+
+  const [total, items] = await Promise.all([
+    model.count({ where }),
+    model.findMany({
+      where,
+      skip: (pageNum - 1) * limitNum,
+      take: limitNum,
+      orderBy: { nombre: 'asc' },
       select: {
         id: true,
         nombre: true,
@@ -245,16 +271,18 @@ export class PrismaEmployeeRepository implements EmployeeRepositoryPort {
           },
         },
       },
-      orderBy: { nombre: 'asc' },
-    });
+    }),
+  ]);
 
-    return users.map((u: any) => ({
-      id: u.id,
-      nombre: u.nombre,
-      correo: u.correo_corporativo,
-      departamento: u.departamentos?.nombre || null,
-      scoreRiesgo: u.score_riesgo ?? 100,
-    }));
-  }
+  const data: EmployeeSummaryItem[] = items.map((u: any) => ({
+    id: u.id,
+    nombre: u.nombre,
+    correo: u.correo_corporativo,
+    departamento: u.departamentos?.nombre || null,
+    scoreRiesgo: u.score_riesgo ?? 100,
+  }));
+
+  return { data, total, page: pageNum, limit: limitNum };
+}
 
 }

@@ -122,10 +122,12 @@ export class EmpleadosController {
   }
 
   @Get('resumen')
-  @ApiOperation({ summary: 'Obtener lista resumida de empleados (nombre, correo, departamento y score)' })
-  @ApiResponse({ status: 200, description: 'Lista de resumen obtenida exitosamente.' })
+  @ApiOperation({ summary: 'Obtener lista resumida y paginada de empleados (nombre, correo, departamento y score)' })
+  @ApiResponse({ status: 200, description: 'Resumen paginado obtenido con éxito.' })
   async getEmployeesSummary(
-    @Param('empresaId', ParseIntPipe) empresaId: number) {
-    return this.getEmployeesSummaryUseCase.execute(empresaId);
+    @Param('empresaId', ParseIntPipe) empresaId: number,
+    @Query() query: GetEmployeesQueryDto,
+  ) {
+    return this.getEmployeesSummaryUseCase.execute(empresaId, query);
   }
 }
