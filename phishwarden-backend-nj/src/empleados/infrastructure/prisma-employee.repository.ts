@@ -12,6 +12,9 @@ import { EmployeeEntity } from '../domain/employee.entity';
 @Injectable()
 export class PrismaEmployeeRepository implements EmployeeRepositoryPort {
   constructor(private readonly prisma: PrismaService) {}
+  private get userModel(): any {
+    return (this.prisma as any).usuarios;
+  }
 
   async findOrCreateDepartment(
     companyId: number,
@@ -225,4 +228,33 @@ export class PrismaEmployeeRepository implements EmployeeRepositoryPort {
     });
     return true;
   }
+
+  async findSummaryByCompany(companyId: number) {
+    if (!this.userModel) return [];
+
+    const users = await this.userModel.findMany({
+      where: { empresa_id: companyId },
+      select: {
+        id: true,
+        nombre: true,
+        correo_corporativo: true,
+        score_riesgo: true,
+        departamentos: {
+          select: {
+            nombre: true,
+          },
+        },
+      },
+      orderBy: { nombre: 'asc' },
+    });
+
+    return users.map((u: any) => ({
+      id: u.id,
+      nombre: u.nombre,
+      correo: u.correo_corporativo,
+      departamento: u.departamentos?.nombre || null,
+      scoreRiesgo: u.score_riesgo ?? 100,
+    }));
+  }
+
 }
