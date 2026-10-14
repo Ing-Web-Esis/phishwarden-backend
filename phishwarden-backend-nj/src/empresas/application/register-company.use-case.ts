@@ -57,7 +57,7 @@ export class RegisterCompanyUseCase {
     });
 
     return {
-      message: 'Organización y administrador registrados exitosamente.',
+      message: 'Administrador registrado exitosamente.',
       empresa: {
         id: result.company.id,
         nombre: result.company.name,
