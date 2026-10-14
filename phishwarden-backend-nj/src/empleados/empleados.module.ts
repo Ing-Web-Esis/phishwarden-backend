@@ -4,6 +4,7 @@ import { GetEmployeesUseCase } from './application/get-employees.use-case';
 import { CreateEmployeeUseCase } from './application/create-employee.use-case';
 import { UpdateEmployeeUseCase } from './application/update-employee.use-case';
 import { DeleteEmployeeUseCase } from './application/delete-employee.use-case';
+import {GetEmployeesSummaryUseCase} from './application/get-employees-summary.use-case';
 
 import { EMPLOYEE_REPOSITORY } from './application/employee.repository.port';
 import { PrismaEmployeeRepository } from './infrastructure/prisma-employee.repository';
@@ -17,6 +18,7 @@ import { PrismaModule } from '../prisma/prisma.module';
     BulkImportEmployeesUseCase,
     GetEmployeesUseCase,
     CreateEmployeeUseCase,
+    GetEmployeesSummaryUseCase,
     UpdateEmployeeUseCase,
     DeleteEmployeeUseCase,
     {
@@ -28,6 +30,7 @@ import { PrismaModule } from '../prisma/prisma.module';
     BulkImportEmployeesUseCase,
     GetEmployeesUseCase,
     CreateEmployeeUseCase,
+    GetEmployeesSummaryUseCase,
     UpdateEmployeeUseCase,
     DeleteEmployeeUseCase,
   ],

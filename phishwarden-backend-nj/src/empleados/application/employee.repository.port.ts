@@ -36,6 +36,15 @@ export interface PaginatedEmployeesResult {
   limit: number;
 }
 
+export interface EmployeeSummaryItem {
+  id: string;
+  nombre: string;
+  correo: string;
+  departamento: string | null;
+  scoreRiesgo: number;
+}
+
+
 export interface EmployeeRepositoryPort {
   findOrCreateDepartment(
     companyId: number,
@@ -56,6 +65,8 @@ export interface EmployeeRepositoryPort {
   findExistingEmails(emails: string[]): Promise<Set<string>>;
 
   findEmployeeById(companyId: number, id: string): Promise<EmployeeEntity | null>;
+
+  findSummaryByCompany(companyId: number): Promise<EmployeeSummaryItem[]>;
 
   findEmployeesPaginated(
     companyId: number,
