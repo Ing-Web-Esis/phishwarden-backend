@@ -44,6 +44,13 @@ export interface EmployeeSummaryItem {
   scoreRiesgo: number;
 }
 
+export interface PaginatedEmployeeSummaryResult {
+  data: EmployeeSummaryItem[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 
 export interface EmployeeRepositoryPort {
   findOrCreateDepartment(
@@ -66,7 +73,18 @@ export interface EmployeeRepositoryPort {
 
   findEmployeeById(companyId: number, id: string): Promise<EmployeeEntity | null>;
 
-  findSummaryByCompany(companyId: number): Promise<EmployeeSummaryItem[]>;
+  findSummaryByCompany(
+    companyId: number,
+    page: number,
+    limit: number,
+    search?: string,
+  ): Promise<PaginatedEmployeeSummaryResult>;
+  findSummaryByCompany(
+  companyId: number,
+  page: number,
+  limit: number,
+  search?: string,
+  ): Promise<PaginatedEmployeeSummaryResult>;
 
   findEmployeesPaginated(
     companyId: number,
