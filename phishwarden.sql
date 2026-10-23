@@ -45,6 +45,7 @@ CREATE TABLE usuarios (
 
 CREATE TABLE plantillas (
     id SERIAL PRIMARY KEY,
+    empresa_id INT REFERENCES empresas(id) ON DELETE CASCADE,
     titulo VARCHAR(150) NOT NULL,
     metodo_ataque VARCHAR(50) CHECK (metodo_ataque IN ('phishing', 'smishing')) NOT NULL,
     asunto VARCHAR(200),

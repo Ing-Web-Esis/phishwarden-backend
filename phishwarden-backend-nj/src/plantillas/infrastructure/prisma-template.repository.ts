@@ -55,13 +55,13 @@ export class PrismaTemplateRepository implements TemplateRepositoryPort {
   private mapToEntity(item: any): TemplateEntity {
     return new TemplateEntity(
       String(item.id),
-      null,
+      item.empresa_id ?? null,
       item.titulo || '',
       item.asunto || '',
       item.cuerpo_html || '',
       this.mapAttackTypeFromDb(item.metodo_ataque),
       this.mapDifficultyFromDb(item.indicador_dificultad),
-      true,
+      item.empresa_id == null,
       item.fecha_creacion || undefined,
       undefined,
     );
@@ -95,7 +95,9 @@ export class PrismaTemplateRepository implements TemplateRepositoryPort {
       return { data: [], total: 0, page: pageNum, limit: limitNum };
     }
 
-    const where: any = {};
+    const where: any = {
+      OR: [{ empresa_id: null }, { empresa_id: companyId }],
+    };
 
     if (attackType) {
       where.metodo_ataque = this.mapAttackTypeToDb(attackType);
@@ -141,6 +143,7 @@ export class PrismaTemplateRepository implements TemplateRepositoryPort {
 
     const created = await this.model.create({
       data: {
+        empresa_id: companyId,
         titulo: data.title,
         asunto: data.subject,
         cuerpo_html: data.bodyHtml,
