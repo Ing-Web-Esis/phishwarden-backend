@@ -85,6 +85,7 @@ export interface EmployeeRepositoryPort {
     page: number,
     limit: number,
     search?: string,
+    departmentId?: number,
   ): Promise<PaginatedEmployeeSummaryResult>;
 
   findAdminEmployeesByCompany(companyId: number): Promise<EmployeeAdminItem[]>;

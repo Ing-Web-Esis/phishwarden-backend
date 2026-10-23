@@ -236,6 +236,7 @@ async findSummaryByCompany(
   page: number,
   limit: number,
   search?: string,
+  departmentId?: number,
 ) {
   const pageNum = Number(page) || 1;
   const limitNum = Number(limit) || 10;
@@ -246,6 +247,10 @@ async findSummaryByCompany(
   }
 
   const where: any = { empresa_id: companyId };
+
+  if (departmentId !== undefined) {
+    where.departamento_id = departmentId;
+  }
 
   if (search) {
     where.OR = [

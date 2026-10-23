@@ -6,6 +6,7 @@ export interface GetEmployeesSummaryQuery {
   page?: number;
   limit?: number;
   search?: string;
+  departmentId?: number;
 }
 
 @Injectable()
@@ -24,6 +25,7 @@ export class GetEmployeesSummaryUseCase {
       page,
       limit,
       query.search,
+      query.departmentId,
     );
   }
 }
