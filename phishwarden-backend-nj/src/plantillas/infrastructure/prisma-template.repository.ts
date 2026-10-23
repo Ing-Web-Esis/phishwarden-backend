@@ -25,7 +25,7 @@ export class PrismaTemplateRepository implements TemplateRepositoryPort {
     if (attackType === AttackType.SMISHING) {
       return 'smishing';
     }
-    return 'phishing'; // Para LINK_CLICK, CREDENTIAL_HARVEST, MALICIOUS_ATTACHMENT
+    return 'phishing';
   }
 
   private mapDifficultyToDb(difficulty?: DifficultyLevel): string {
@@ -46,10 +46,10 @@ export class PrismaTemplateRepository implements TemplateRepositoryPort {
   }
 
   private mapAttackTypeFromDb(rawType?: string): AttackType {
-    if (!rawType) return AttackType.LINK_CLICK;
+    if (!rawType) return AttackType.PHISHING;
     const norm = rawType.toLowerCase();
     if (norm === 'smishing') return AttackType.SMISHING;
-    return AttackType.CREDENTIAL_HARVEST;
+    return AttackType.PHISHING;
   }
 
   private mapToEntity(item: any): TemplateEntity {

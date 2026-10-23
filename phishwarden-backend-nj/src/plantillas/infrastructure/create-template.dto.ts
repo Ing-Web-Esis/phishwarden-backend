@@ -29,7 +29,7 @@ export class CreateTemplateDto {
 
   @ApiProperty({
     enum: AttackType,
-    example: AttackType.CREDENTIAL_HARVEST,
+    example: AttackType.PHISHING,
     description: 'Vector de ataque de phishing',
   })
   @IsEnum(AttackType)
