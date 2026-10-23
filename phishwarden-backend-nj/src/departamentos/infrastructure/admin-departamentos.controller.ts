@@ -5,7 +5,12 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import type { Request } from 'express';
 import { JwtAuthGuard } from '../../auth/infrastructure/jwt-auth.guard';
 import { GetDepartmentsUseCase } from '../application/get-departments.use-case';
@@ -23,6 +28,7 @@ export class AdminDepartamentosController {
 
   @Get()
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Obtener estadísticas de departamentos del administrador autenticado',
   })

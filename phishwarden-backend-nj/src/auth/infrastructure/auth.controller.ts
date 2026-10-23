@@ -1,7 +1,13 @@
 import { Controller, Post, Body, Get, Req, UseGuards, UnauthorizedException } from '@nestjs/common';
 import { LoginUseCase } from '../application/login.use-case';
 import { LoginDto } from './login.dto';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import type { Request } from 'express';
 
@@ -25,6 +31,7 @@ export class AuthController {
 
   @Get('me')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Obtener el perfil del administrador autenticado' })
   @ApiResponse({ status: 200, description: 'Perfil del administrador.' })
   @ApiResponse({ status: 401, description: 'Token ausente, inválido o expirado.' })

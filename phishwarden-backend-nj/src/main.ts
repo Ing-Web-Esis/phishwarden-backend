@@ -56,6 +56,7 @@ async function bootstrap() {
     .setTitle('PhishWarden API')
     .setDescription('Documentación de la API RESTful para la plataforma PhishWarden')
     .setVersion('1.0')
+    .addBearerAuth()
     .addTag('auth')
     .addTag('empresas')
     .addTag('empleados')
