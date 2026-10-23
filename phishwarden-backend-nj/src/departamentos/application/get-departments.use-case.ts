@@ -12,4 +12,8 @@ export class GetDepartmentsUseCase {
   async execute(companyId: number) {
     return this.departmentRepository.findByCompany(companyId);
   }
+
+  async getStats(companyId: number) {
+    return this.departmentRepository.findStatsByCompany(companyId);
+  }
 }

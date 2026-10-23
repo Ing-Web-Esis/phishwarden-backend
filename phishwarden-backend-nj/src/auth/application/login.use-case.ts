@@ -33,6 +33,7 @@ export class LoginUseCase {
         access_token: await this.jwtService.signAsync({
           sub: admin.id,
           role: admin.role,
+          empresaId: admin.empresaId,
         }),
       };
     }

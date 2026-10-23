@@ -5,10 +5,12 @@ import { DEPARTMENT_REPOSITORY } from './application/department.repository.port'
 import { PrismaDepartmentRepository } from './infrastructure/prisma-department.repository';
 import { DepartamentosController } from './infrastructure/departamentos.controller';
 import { PrismaModule } from '../prisma/prisma.module';
+import { AdminDepartamentosController } from './infrastructure/admin-departamentos.controller';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
-  imports: [PrismaModule],
-  controllers: [DepartamentosController],
+  imports: [PrismaModule, AuthModule],
+  controllers: [DepartamentosController, AdminDepartamentosController],
   providers: [
     GetDepartmentsUseCase,
     CreateDepartmentUseCase,

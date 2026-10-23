@@ -8,7 +8,7 @@ import { JwtService } from '@nestjs/jwt';
 import type { Request } from 'express';
 
 type AuthenticatedRequest = Request & {
-  user: { sub: number; role?: string };
+  user: { sub: number; role?: string; empresaId?: number };
 };
 
 @Injectable()
@@ -25,9 +25,11 @@ export class JwtAuthGuard implements CanActivate {
     }
 
     try {
-      request.user = await this.jwtService.verifyAsync<{ sub: number; role?: string }>(
-        token,
-      );
+      request.user = await this.jwtService.verifyAsync<{
+        sub: number;
+        role?: string;
+        empresaId?: number;
+      }>(token);
       return true;
     } catch {
       throw new UnauthorizedException('Token inválido o expirado');
