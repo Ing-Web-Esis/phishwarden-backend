@@ -1,4 +1,9 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AUTH_REPOSITORY } from './auth.repository.port';
 import type { AuthRepositoryPort } from './auth.repository.port';
@@ -62,5 +67,77 @@ export class LoginUseCase {
 
   async getAdminProfile(id: number) {
     return this.authRepository.findAdminProfileById(id);
+  }
+
+  async updateAdminProfile(
+    id: number,
+    data: {
+      nombre?: string;
+      correo?: string;
+      nombreEmpresa?: string;
+      contraseñaActual?: string;
+      nuevaContraseña?: string;
+    },
+  ) {
+    if (
+      data.nombre === undefined &&
+      data.correo === undefined &&
+      data.nombreEmpresa === undefined &&
+      data.nuevaContraseña === undefined
+    ) {
+      throw new BadRequestException(
+        'Debes enviar al menos un campo para actualizar',
+      );
+    }
+
+    if (data.nuevaContraseña !== undefined && !data.contraseñaActual) {
+      throw new BadRequestException(
+        'La contraseña actual es obligatoria para cambiar la contraseña',
+      );
+    }
+
+    if (data.nombreEmpresa !== undefined) {
+      const profile = await this.authRepository.findAdminProfileById(id);
+      if (!profile) {
+        throw new UnauthorizedException('Administrador no encontrado');
+      }
+      if (!profile.empresaId) {
+        throw new BadRequestException(
+          'El administrador no tiene una empresa asignada',
+        );
+      }
+    }
+
+    let passwordHash: string | undefined;
+    if (data.nuevaContraseña !== undefined) {
+      const admin = await this.authRepository.findAdminCredentialsById(id);
+      if (!admin) {
+        throw new UnauthorizedException('Administrador no encontrado');
+      }
+
+      const isPasswordValid = await bcrypt.compare(
+        data.contraseñaActual!,
+        admin.passwordHash,
+      );
+      if (!isPasswordValid) {
+        throw new UnauthorizedException('La contraseña actual es incorrecta');
+      }
+
+      passwordHash = await bcrypt.hash(data.nuevaContraseña, 12);
+    }
+
+    await this.authRepository.updateAdminProfile(id, {
+      nombre: data.nombre?.trim(),
+      correo: data.correo?.trim().toLowerCase(),
+      nombreEmpresa: data.nombreEmpresa?.trim(),
+      passwordHash,
+    });
+
+    const profile = await this.authRepository.findAdminProfileById(id);
+    if (!profile) {
+      throw new UnauthorizedException('Administrador no encontrado');
+    }
+
+    return profile;
   }
 }

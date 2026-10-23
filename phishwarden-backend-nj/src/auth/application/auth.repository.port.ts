@@ -8,6 +8,19 @@ export interface AuthRepositoryPort {
     role: string;
     empresaId?: number;
   } | null>;
+  findAdminCredentialsById(id: number): Promise<{
+    id: number;
+    passwordHash: string;
+  } | null>;
+  updateAdminProfile(
+    id: number,
+    data: {
+      nombre?: string;
+      correo?: string;
+      nombreEmpresa?: string;
+      passwordHash?: string;
+    },
+  ): Promise<void>;
   findAdminProfileById(id: number): Promise<{
     id: string;
     nombre: string;

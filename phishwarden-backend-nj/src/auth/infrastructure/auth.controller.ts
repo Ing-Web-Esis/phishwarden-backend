@@ -1,4 +1,13 @@
-import { Controller, Post, Body, Get, Req, UseGuards, UnauthorizedException } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Put,
+  Req,
+  UnauthorizedException,
+  UseGuards,
+} from '@nestjs/common';
 import { LoginUseCase } from '../application/login.use-case';
 import { LoginDto } from './login.dto';
 import {
@@ -10,6 +19,7 @@ import {
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import type { Request } from 'express';
+import { UpdateAdminProfileDto } from './update-admin-profile.dto';
 
 type AuthenticatedRequest = Request & {
   user: { sub: number };
@@ -41,5 +51,20 @@ export class AuthController {
       throw new UnauthorizedException('Administrador no encontrado');
     }
     return profile;
+  }
+
+  @Put('me')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Actualizar el perfil del administrador autenticado' })
+  @ApiBody({ type: UpdateAdminProfileDto })
+  @ApiResponse({ status: 200, description: 'Perfil actualizado.' })
+  @ApiResponse({ status: 400, description: 'Datos de actualización inválidos.' })
+  @ApiResponse({ status: 401, description: 'Token o contraseña actual inválidos.' })
+  async updateMe(
+    @Req() request: AuthenticatedRequest,
+    @Body() dto: UpdateAdminProfileDto,
+  ) {
+    return this.loginUseCase.updateAdminProfile(request.user.sub, dto);
   }
 }

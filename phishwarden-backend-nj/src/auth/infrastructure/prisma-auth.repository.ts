@@ -46,6 +46,55 @@ export class PrismaAuthRepository implements AuthRepositoryPort {
     };
   }
 
+  async findAdminCredentialsById(id: number) {
+    const admin = await this.prisma.administradores.findUnique({
+      where: { id },
+      select: { id: true, password_hash: true },
+    });
+    if (!admin) return null;
+
+    return { id: admin.id, passwordHash: admin.password_hash };
+  }
+
+  async updateAdminProfile(
+    id: number,
+    data: {
+      nombre?: string;
+      correo?: string;
+      nombreEmpresa?: string;
+      passwordHash?: string;
+    },
+  ): Promise<void> {
+    await this.prisma.$transaction(async (transaction) => {
+      const admin = await transaction.administradores.findUnique({
+        where: { id },
+        select: { empresa_id: true },
+      });
+
+      if (!admin) {
+        throw new Error('Administrador no encontrado');
+      }
+
+      await transaction.administradores.update({
+        where: { id },
+        data: {
+          ...(data.nombre !== undefined ? { nombre: data.nombre } : {}),
+          ...(data.correo !== undefined ? { correo: data.correo } : {}),
+          ...(data.passwordHash !== undefined
+            ? { password_hash: data.passwordHash }
+            : {}),
+        },
+      });
+
+      if (data.nombreEmpresa !== undefined && admin.empresa_id !== null) {
+        await transaction.empresas.update({
+          where: { id: admin.empresa_id },
+          data: { nombre: data.nombreEmpresa },
+        });
+      }
+    });
+  }
+
   async findCompanyByCode(code: string): Promise<{ id: number; name: string } | null> {
     const empresa = await this.prisma.empresas.findFirst({
       where: { codigo_acceso: code } as any,
