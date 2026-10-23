@@ -29,4 +29,12 @@ export class GetEmployeesUseCase {
       deptId,
     );
   }
+
+  async getAdminEmployees(companyId: number) {
+    return this.employeeRepository.findAdminEmployeesByCompany(companyId);
+  }
+
+  async getAdminEmployee(companyId: number, employeeId: string) {
+    return this.employeeRepository.findAdminEmployeeById(companyId, employeeId);
+  }
 }

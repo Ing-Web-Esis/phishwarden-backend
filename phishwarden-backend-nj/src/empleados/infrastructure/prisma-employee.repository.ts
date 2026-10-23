@@ -3,6 +3,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import type {
   EmployeeRepositoryPort,
   CreateEmployeeInput,
+  EmployeeAdminItem,
   UpdateEmployeeInput,
   PaginatedEmployeesResult,
   EmployeeSummaryItem,
@@ -284,5 +285,64 @@ async findSummaryByCompany(
 
   return { data, total, page: pageNum, limit: limitNum };
 }
+
+  async findAdminEmployeesByCompany(
+    companyId: number,
+  ): Promise<EmployeeAdminItem[]> {
+    const model = (this.prisma as any).usuarios;
+    if (!model) return [];
+
+    const employees = await model.findMany({
+      where: { empresa_id: companyId },
+      orderBy: { nombre: 'asc' },
+      select: {
+        nombre: true,
+        correo_corporativo: true,
+        numero_telefonico: true,
+        score_riesgo: true,
+        racha_dias_seguros: true,
+      },
+    });
+
+    return employees.map((employee: any) => ({
+      nombre: employee.nombre,
+      correo: employee.correo_corporativo,
+      telefono: employee.numero_telefonico ?? null,
+      scoreRiesgo: employee.score_riesgo ?? 100,
+      rachaDiasSeguros: employee.racha_dias_seguros ?? 0,
+    }));
+  }
+
+  async findAdminEmployeeById(
+    companyId: number,
+    employeeId: string,
+  ): Promise<EmployeeAdminItem | null> {
+    const model = (this.prisma as any).usuarios;
+    if (!model) return null;
+
+    const employee = await model.findFirst({
+      where: {
+        id: employeeId,
+        empresa_id: companyId,
+      },
+      select: {
+        nombre: true,
+        correo_corporativo: true,
+        numero_telefonico: true,
+        score_riesgo: true,
+        racha_dias_seguros: true,
+      },
+    });
+
+    if (!employee) return null;
+
+    return {
+      nombre: employee.nombre,
+      correo: employee.correo_corporativo,
+      telefono: employee.numero_telefonico ?? null,
+      scoreRiesgo: employee.score_riesgo ?? 100,
+      rachaDiasSeguros: employee.racha_dias_seguros ?? 0,
+    };
+  }
 
 }

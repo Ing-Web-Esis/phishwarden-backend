@@ -10,10 +10,12 @@ import { EMPLOYEE_REPOSITORY } from './application/employee.repository.port';
 import { PrismaEmployeeRepository } from './infrastructure/prisma-employee.repository';
 import { EmpleadosController } from './infrastructure/empleados.controller';
 import { PrismaModule } from '../prisma/prisma.module';
+import { AdminEmpleadosController } from './infrastructure/admin-empleados.controller';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
-  imports: [PrismaModule],
-  controllers: [EmpleadosController],
+  imports: [PrismaModule, AuthModule],
+  controllers: [EmpleadosController, AdminEmpleadosController],
   providers: [
     BulkImportEmployeesUseCase,
     GetEmployeesUseCase,
