@@ -6,15 +6,16 @@ import {
   IsArray,
   IsUUID,
   IsDate,
+  IsOptional,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ShippingMethod } from '../domain/campaign.entity';
 
 export class CreateCampaignDto {
   @ApiProperty({
     example: 'Campaña de concientización Q4 - Tacna',
-    description: 'Nombre de la campaña',
+    description: 'Nombre identificador de la campaña',
   })
   @IsString()
   @IsNotEmpty()
@@ -29,7 +30,7 @@ export class CreateCampaignDto {
 
   @ApiProperty({
     example: '2026-11-01T09:00:00.000Z',
-    description: 'Fecha y hora programada para el inicio del envío',
+    description: 'Fecha y hora programada para el inicio del envío (ISO 8601)',
   })
   @Type(() => Date)
   @IsDate()
@@ -43,12 +44,23 @@ export class CreateCampaignDto {
   @IsEnum(ShippingMethod)
   shippingMethod: ShippingMethod;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     type: [String],
     example: ['a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11'],
-    description: 'Lista de UUIDs de usuarios objetivo pertenecientes a la empresa',
+    description: 'Lista de UUIDs de colaboradores objetivo pertenecientes a la empresa',
   })
+  @IsOptional()
   @IsArray()
   @IsUUID('4', { each: true })
-  targetUserIds: string[];
+  targetUserIds?: string[];
+
+  @ApiPropertyOptional({
+    type: [Number],
+    example: [1, 2],
+    description: 'Lista de IDs de departamentos para asignar a todos sus miembros',
+  })
+  @IsOptional()
+  @IsArray()
+  @IsInt({ each: true })
+  departmentIds?: number[];
 }

@@ -8,9 +8,11 @@ import { TEMPLATE_REPOSITORY } from './application/template.repository.port';
 import { PrismaTemplateRepository } from './infrastructure/prisma-template.repository';
 import { PlantillasController } from './infrastructure/plantillas.controller';
 import { PrismaModule } from '../prisma/prisma.module';
+import { AuthModule } from '../auth/auth.module';
+import { PortalesModule } from '../portales/portales.module';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, AuthModule, PortalesModule],
   controllers: [PlantillasController],
   providers: [
     GetTemplatesUseCase,

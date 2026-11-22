@@ -22,7 +22,15 @@ export class PrismaCompanyRepository implements CompanyRepositoryPort {
       where: { codigo_acceso: code } as any,
     });
     if (!empresa) return null;
-    return new CompanyEntity(empresa.id, empresa.nombre, (empresa as any).codigo_acceso);
+    return new CompanyEntity(empresa.id, empresa.nombre, (empresa as any).codigo_acceso, empresa.fecha_creacion || undefined);
+  }
+
+  async findById(id: number): Promise<CompanyEntity | null> {
+    const empresa = await this.prisma.empresas.findUnique({
+      where: { id },
+    });
+    if (!empresa) return null;
+    return new CompanyEntity(empresa.id, empresa.nombre, empresa.codigo_acceso, empresa.fecha_creacion || undefined);
   }
 
   async createCompanyWithAdmin(data: CreateCompanyAndAdminInput) {

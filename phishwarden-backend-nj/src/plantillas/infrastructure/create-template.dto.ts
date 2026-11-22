@@ -1,6 +1,6 @@
-import { IsString, IsNotEmpty, IsEnum } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
-import { AttackType, DifficultyLevel } from '../domain/template.entity';
+import { IsString, IsNotEmpty, IsEnum, IsOptional, IsInt } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { AttackType, DifficultyLevel, LandingType } from '../domain/template.entity';
 
 export class CreateTemplateDto {
   @ApiProperty({
@@ -42,4 +42,21 @@ export class CreateTemplateDto {
   })
   @IsEnum(DifficultyLevel)
   difficulty: DifficultyLevel;
+
+  @ApiPropertyOptional({
+    enum: LandingType,
+    example: LandingType.MICROSOFT,
+    description: 'Tipo de landing page para la simulación (microsoft, google, corporativo, bancario, generico, unjbg, personalizado)',
+  })
+  @IsOptional()
+  @IsEnum(LandingType)
+  landingTipo?: LandingType;
+
+  @ApiPropertyOptional({
+    example: 1,
+    description: 'ID del portal simulado configurado (portales_simulados)',
+  })
+  @IsOptional()
+  @IsInt()
+  landingId?: number | null;
 }

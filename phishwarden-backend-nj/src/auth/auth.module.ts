@@ -5,6 +5,7 @@ import { PrismaAuthRepository } from './infrastructure/prisma-auth.repository';
 import { AUTH_REPOSITORY } from './application/auth.repository.port';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtAuthGuard } from './infrastructure/jwt-auth.guard';
+import { CompanyTenantGuard } from './infrastructure/company-tenant.guard';
 
 @Module({
   imports: [
@@ -17,11 +18,12 @@ import { JwtAuthGuard } from './infrastructure/jwt-auth.guard';
   providers: [
     LoginUseCase,
     JwtAuthGuard,
+    CompanyTenantGuard,
     {
       provide: AUTH_REPOSITORY,
       useClass: PrismaAuthRepository,
     },
   ],
-  exports: [JwtAuthGuard, JwtModule],
+  exports: [JwtAuthGuard, CompanyTenantGuard, JwtModule],
 })
 export class AuthModule {}

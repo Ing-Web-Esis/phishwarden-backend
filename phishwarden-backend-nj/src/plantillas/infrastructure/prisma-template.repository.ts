@@ -10,6 +10,7 @@ import {
   TemplateEntity,
   AttackType,
   DifficultyLevel,
+  LandingType,
 } from '../domain/template.entity';
 
 @Injectable()
@@ -52,9 +53,30 @@ export class PrismaTemplateRepository implements TemplateRepositoryPort {
     return AttackType.PHISHING;
   }
 
+  private mapLandingTipoFromDb(rawLanding?: string): LandingType {
+    if (!rawLanding) return LandingType.GENERICO;
+    const norm = rawLanding.toLowerCase();
+    switch (norm) {
+      case 'microsoft':
+        return LandingType.MICROSOFT;
+      case 'google':
+        return LandingType.GOOGLE;
+      case 'corporativo':
+        return LandingType.CORPORATIVO;
+      case 'bancario':
+        return LandingType.BANCARIO;
+      case 'unjbg':
+        return LandingType.UNJBG;
+      case 'personalizado':
+        return LandingType.PERSONALIZADO;
+      default:
+        return LandingType.GENERICO;
+    }
+  }
+
   private mapToEntity(item: any): TemplateEntity {
     return new TemplateEntity(
-      String(item.id),
+      Number(item.id),
       item.empresa_id ?? null,
       item.titulo || '',
       item.asunto || '',
@@ -64,17 +86,17 @@ export class PrismaTemplateRepository implements TemplateRepositoryPort {
       item.empresa_id == null,
       item.fecha_creacion || undefined,
       undefined,
+      this.mapLandingTipoFromDb(item.landing_tipo),
+      item.landing_id ?? null,
     );
   }
 
-  async findById(id: string): Promise<TemplateEntity | null> {
+  async findById(id: number): Promise<TemplateEntity | null> {
     if (!this.model) return null;
 
-    const numericId = parseInt(id, 10);
-    const whereCondition = isNaN(numericId) ? { id } : { id: numericId };
-
+    const numericId = Number(id);
     const template = await this.model.findUnique({
-      where: whereCondition,
+      where: { id: numericId },
     });
 
     return template ? this.mapToEntity(template) : null;
@@ -149,20 +171,24 @@ export class PrismaTemplateRepository implements TemplateRepositoryPort {
         cuerpo_html: data.bodyHtml,
         metodo_ataque: this.mapAttackTypeToDb(data.attackType),
         indicador_dificultad: this.mapDifficultyToDb(data.difficulty),
+        landing_tipo: data.landingTipo || 'generico',
+        landing_id: data.landingId ?? null,
       },
     });
 
     return this.mapToEntity(created);
   }
 
-  async update(id: string, data: UpdateTemplateInput): Promise<TemplateEntity> {
+  async update(
+    companyId: number,
+    id: number,
+    data: UpdateTemplateInput,
+  ): Promise<TemplateEntity> {
     if (!this.model) {
       throw new Error('El modelo de plantillas no está disponible en Prisma.');
     }
 
-    const numericId = parseInt(id, 10);
-    const whereCondition = isNaN(numericId) ? { id } : { id: numericId };
-
+    const numericId = Number(id);
     const updateData: any = {};
     if (data.title) updateData.titulo = data.title;
     if (data.subject) updateData.asunto = data.subject;
@@ -173,25 +199,29 @@ export class PrismaTemplateRepository implements TemplateRepositoryPort {
     if (data.difficulty) {
       updateData.indicador_dificultad = this.mapDifficultyToDb(data.difficulty);
     }
+    if (data.landingTipo) {
+      updateData.landing_tipo = data.landingTipo;
+    }
+    if (data.landingId !== undefined) {
+      updateData.landing_id = data.landingId;
+    }
 
     const updated = await this.model.update({
-      where: whereCondition,
+      where: { id: numericId },
       data: updateData,
     });
 
     return this.mapToEntity(updated);
   }
 
-  async delete(id: string): Promise<boolean> {
+  async delete(companyId: number, id: number): Promise<boolean> {
     if (!this.model) return false;
 
-    const numericId = parseInt(id, 10);
-    const whereCondition = isNaN(numericId) ? { id } : { id: numericId };
-
-    await this.model.delete({
-      where: whereCondition,
+    const numericId = Number(id);
+    const result = await this.model.deleteMany({
+      where: { id: numericId, empresa_id: companyId },
     });
 
-    return true;
+    return result.count > 0;
   }
 }

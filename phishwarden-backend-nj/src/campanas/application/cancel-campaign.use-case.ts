@@ -1,6 +1,12 @@
-import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { CAMPAIGN_REPOSITORY } from './campaign.repository.port';
 import type { CampaignRepositoryPort } from './campaign.repository.port';
+import { CampaignStatus } from '../domain/campaign.entity';
 
 @Injectable()
 export class CancelCampaignUseCase {
@@ -9,14 +15,25 @@ export class CancelCampaignUseCase {
     private readonly campaignRepository: CampaignRepositoryPort,
   ) {}
 
-  async execute(id: string) {
-    const existing = await this.campaignRepository.findById(id);
+  async execute(id: string, companyId: number) {
+    const existing = await this.campaignRepository.findById(id, companyId);
 
     if (!existing) {
-      throw new NotFoundException('La campaña no fue encontrada.');
+      throw new NotFoundException(
+        'La campaña no fue encontrada o no pertenece a esta empresa.',
+      );
     }
 
-    await this.campaignRepository.cancel(id);
+    if (
+      existing.status !== CampaignStatus.PROGRAMADA &&
+      existing.status !== CampaignStatus.EN_CURSO
+    ) {
+      throw new BadRequestException(
+        'Solo se pueden cancelar campañas que se encuentren programadas o en curso.',
+      );
+    }
+
+    await this.campaignRepository.cancel(id, companyId);
 
     return {
       message: 'Campaña cancelada exitosamente.',

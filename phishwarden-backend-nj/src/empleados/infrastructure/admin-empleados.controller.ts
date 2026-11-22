@@ -6,6 +6,7 @@ import {
   Param,
   Req,
   UseGuards,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -39,7 +40,7 @@ export class AdminEmpleadosController {
   @ApiResponse({ status: 403, description: 'El administrador no tiene empresa asignada.' })
   @ApiResponse({ status: 404, description: 'Empleado no encontrado.' })
   async getAdminEmployee(
-    @Param('id') employeeId: string,
+    @Param('id', ParseUUIDPipe) employeeId: string,
     @Req() request: AuthenticatedRequest,
   ) {
     if (!request.user.empresaId) {

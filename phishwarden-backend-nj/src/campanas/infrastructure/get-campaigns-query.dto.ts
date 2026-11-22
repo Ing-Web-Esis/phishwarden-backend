@@ -4,14 +4,14 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 import { CampaignStatus } from '../domain/campaign.entity';
 
 export class GetCampaignsQueryDto {
-  @ApiPropertyOptional({ example: 1, default: 1 })
+  @ApiPropertyOptional({ example: 1, default: 1, description: 'Número de página' })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)
   page?: number = 1;
 
-  @ApiPropertyOptional({ example: 10, default: 10 })
+  @ApiPropertyOptional({ example: 10, default: 10, description: 'Cantidad de elementos por página' })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
@@ -23,8 +23,13 @@ export class GetCampaignsQueryDto {
   @IsString()
   search?: string;
 
-  @ApiPropertyOptional({ enum: CampaignStatus })
+  @ApiPropertyOptional({ enum: CampaignStatus, description: 'Filtro por estado de la campaña' })
   @IsOptional()
   @IsEnum(CampaignStatus)
   status?: CampaignStatus;
+
+  @ApiPropertyOptional({ example: 'phishing', description: 'Filtro por método de ataque de la plantilla (phishing | smishing)' })
+  @IsOptional()
+  @IsString()
+  attackType?: string;
 }

@@ -41,7 +41,11 @@ export class PrismaAuthRepository implements AuthRepositoryPort {
       correo: admin.correo,
       empresaId: admin.empresa_id,
       empresa: admin.empresas
-        ? { id: admin.empresas.id, nombre: admin.empresas.nombre }
+        ? {
+            id: admin.empresas.id,
+            nombre: admin.empresas.nombre,
+            codigoAcceso: admin.empresas.codigo_acceso,
+          }
         : null,
     };
   }

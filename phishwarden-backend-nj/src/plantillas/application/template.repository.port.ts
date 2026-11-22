@@ -2,6 +2,7 @@ import {
   TemplateEntity,
   AttackType,
   DifficultyLevel,
+  LandingType,
 } from '../domain/template.entity';
 
 export interface CreateTemplateInput {
@@ -10,6 +11,8 @@ export interface CreateTemplateInput {
   bodyHtml: string;
   attackType: AttackType;
   difficulty: DifficultyLevel;
+  landingTipo?: LandingType;
+  landingId?: number | null;
   isGlobal?: boolean;
 }
 
@@ -19,6 +22,8 @@ export interface UpdateTemplateInput {
   bodyHtml?: string;
   attackType?: AttackType;
   difficulty?: DifficultyLevel;
+  landingTipo?: LandingType;
+  landingId?: number | null;
 }
 
 export interface PaginatedTemplatesResult {
@@ -29,7 +34,7 @@ export interface PaginatedTemplatesResult {
 }
 
 export interface TemplateRepositoryPort {
-  findById(id: string): Promise<TemplateEntity | null>;
+  findById(id: number): Promise<TemplateEntity | null>;
 
   // Retorna plantillas globales + las propias de la empresa
   findPaginated(
@@ -46,9 +51,13 @@ export interface TemplateRepositoryPort {
     data: CreateTemplateInput,
   ): Promise<TemplateEntity>;
 
-  update(id: string, data: UpdateTemplateInput): Promise<TemplateEntity>;
+  update(
+    companyId: number,
+    id: number,
+    data: UpdateTemplateInput,
+  ): Promise<TemplateEntity>;
 
-  delete(id: string): Promise<boolean>;
+  delete(companyId: number, id: number): Promise<boolean>;
 }
 
 export const TEMPLATE_REPOSITORY = 'TEMPLATE_REPOSITORY';

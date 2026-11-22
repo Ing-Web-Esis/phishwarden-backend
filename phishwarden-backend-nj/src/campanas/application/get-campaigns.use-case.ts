@@ -1,13 +1,17 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { CAMPAIGN_REPOSITORY } from './campaign.repository.port';
-import type { CampaignRepositoryPort } from './campaign.repository.port';
-import { CampaignStatus } from '../domain/campaign.entity';
+import type {
+  CampaignRepositoryPort,
+  PaginatedCampaignsResult,
+} from './campaign.repository.port';
+import type { CampaignStatus } from '../domain/campaign.entity';
 
 export interface GetCampaignsQuery {
   page?: number;
   limit?: number;
   search?: string;
   status?: CampaignStatus;
+  attackType?: string;
 }
 
 @Injectable()
@@ -17,16 +21,19 @@ export class GetCampaignsUseCase {
     private readonly campaignRepository: CampaignRepositoryPort,
   ) {}
 
-  async execute(companyId: number, query: GetCampaignsQuery) {
+  async execute(
+    companyId: number,
+    query: GetCampaignsQuery,
+  ): Promise<PaginatedCampaignsResult> {
     const page = Number(query.page) > 0 ? Number(query.page) : 1;
     const limit = Number(query.limit) > 0 ? Number(query.limit) : 10;
 
-    return this.campaignRepository.findPaginated(
-      companyId,
+    return this.campaignRepository.findPaginated(companyId, {
       page,
       limit,
-      query.search,
-      query.status,
-    );
+      search: query.search?.trim(),
+      status: query.status,
+      attackType: query.attackType?.trim(),
+    });
   }
 }

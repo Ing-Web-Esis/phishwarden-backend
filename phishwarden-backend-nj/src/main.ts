@@ -1,3 +1,4 @@
+import './load-env';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
@@ -44,6 +45,7 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
+      forbidNonWhitelisted: true,
       transform: true,
       transformOptions: {
         enableImplicitConversion: true,
@@ -57,9 +59,12 @@ async function bootstrap() {
     .setDescription('Documentación de la API RESTful para la plataforma PhishWarden')
     .setVersion('1.0')
     .addBearerAuth()
-    .addTag('auth')
-    .addTag('empresas')
-    .addTag('empleados')
+    .addTag('auth', 'Autenticación y perfiles administrativos')
+    .addTag('empresas', 'Registro y gestión de empresas')
+    .addTag('departamentos', 'Gestión de áreas y departamentos corporativos')
+    .addTag('empleados', 'Gestión y nómina de colaboradores')
+    .addTag('plantillas', 'Plantillas de señuelos y simulación')
+    .addTag('campanas', 'Simulaciones y campañas de concientización')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

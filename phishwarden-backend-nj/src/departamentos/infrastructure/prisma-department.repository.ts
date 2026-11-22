@@ -119,10 +119,10 @@ export class PrismaDepartmentRepository implements DepartmentRepositoryPort {
   async delete(id: number, companyId: number): Promise<boolean> {
     if (!this.model) return false;
 
-    await this.model.delete({
+    const result = await this.model.deleteMany({
       where: { id, empresa_id: companyId },
     });
 
-    return true;
+    return result.count > 0;
   }
 }

@@ -87,6 +87,8 @@ export class PrismaEmployeeRepository implements EmployeeRepositoryPort {
       empresa_id: companyId,
       nombre: emp.name,
       correo_corporativo: emp.email,
+      score_riesgo: 0,
+      racha_dias_seguros: 0,
       ...(emp.departmentId && emp.departmentId > 0
         ? { departamento_id: emp.departmentId }
         : {}),
@@ -180,6 +182,8 @@ export class PrismaEmployeeRepository implements EmployeeRepositoryPort {
         empresa_id: companyId,
         nombre: data.name,
         correo_corporativo: data.email,
+        score_riesgo: 0,
+        racha_dias_seguros: 0,
         ...(data.departmentId ? { departamento_id: data.departmentId } : {}),
         ...(data.phone ? { numero_telefonico: data.phone } : {}),
       } as any,
@@ -201,6 +205,14 @@ export class PrismaEmployeeRepository implements EmployeeRepositoryPort {
     id: string,
     data: UpdateEmployeeInput,
   ): Promise<EmployeeEntity> {
+    const existing = await this.prisma.usuarios.findFirst({
+      where: { id, empresa_id: companyId },
+    });
+
+    if (!existing) {
+      throw new Error('Empleado no encontrado en esta empresa');
+    }
+
     const updateData: any = {};
     if (data.name) updateData.nombre = data.name;
     if (data.email) updateData.correo_corporativo = data.email;
@@ -225,10 +237,10 @@ export class PrismaEmployeeRepository implements EmployeeRepositoryPort {
   }
 
   async deleteEmployee(companyId: number, id: string): Promise<boolean> {
-    await this.prisma.usuarios.delete({
-      where: { id },
+    const result = await this.prisma.usuarios.deleteMany({
+      where: { id, empresa_id: companyId },
     });
-    return true;
+    return result.count > 0;
   }
 
 async findSummaryByCompany(
@@ -248,8 +260,11 @@ async findSummaryByCompany(
 
   const where: any = { empresa_id: companyId };
 
-  if (departmentId !== undefined) {
-    where.departamento_id = departmentId;
+  if (departmentId !== undefined && departmentId !== null) {
+    const parsedDeptId = Number(departmentId);
+    if (!isNaN(parsedDeptId)) {
+      where.departamento_id = parsedDeptId;
+    }
   }
 
   if (search) {
@@ -285,7 +300,7 @@ async findSummaryByCompany(
     nombre: u.nombre,
     correo: u.correo_corporativo,
     departamento: u.departamentos?.nombre || null,
-    scoreRiesgo: u.score_riesgo ?? 100,
+    scoreRiesgo: u.score_riesgo ?? 0,
   }));
 
   return { data, total, page: pageNum, limit: limitNum };
