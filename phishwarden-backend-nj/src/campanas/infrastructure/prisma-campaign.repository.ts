@@ -52,22 +52,27 @@ export class PrismaCampaignRepository implements CampaignRepositoryPort {
       },
     };
 
-    const [total, programadas, enCurso, finalizadas, canceladas] =
-      await Promise.all([
-        this.campaignModel.count({ where: baseWhere }),
-        this.campaignModel.count({
-          where: { ...baseWhere, estado: CampaignStatus.PROGRAMADA },
-        }),
-        this.campaignModel.count({
-          where: { ...baseWhere, estado: CampaignStatus.EN_CURSO },
-        }),
-        this.campaignModel.count({
-          where: { ...baseWhere, estado: CampaignStatus.FINALIZADA },
-        }),
-        this.campaignModel.count({
-          where: { ...baseWhere, estado: CampaignStatus.CANCELADA },
-        }),
-      ]);
+    const groups = await (this.campaignModel as any).groupBy({
+      by: ['estado'],
+      where: baseWhere,
+      _count: { _all: true },
+    });
+
+    let programadas = 0;
+    let enCurso = 0;
+    let finalizadas = 0;
+    let canceladas = 0;
+    let total = 0;
+
+    for (const g of groups) {
+      const c = g._count?._all ?? 0;
+      total += c;
+      const estado = g.estado;
+      if (estado === CampaignStatus.PROGRAMADA) programadas = c;
+      else if (estado === CampaignStatus.EN_CURSO) enCurso = c;
+      else if (estado === CampaignStatus.FINALIZADA) finalizadas = c;
+      else if (estado === CampaignStatus.CANCELADA) canceladas = c;
+    }
 
     return { total, programadas, enCurso, finalizadas, canceladas };
   }

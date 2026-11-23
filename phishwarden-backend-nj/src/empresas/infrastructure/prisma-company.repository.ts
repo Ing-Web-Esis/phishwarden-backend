@@ -3,6 +3,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import {
   CompanyRepositoryPort,
   CreateCompanyAndAdminInput,
+  UpdateCompanyInput,
 } from '../application/company.repository.port';
 import { CompanyEntity } from '../domain/company.entity';
 
@@ -31,6 +32,26 @@ export class PrismaCompanyRepository implements CompanyRepositoryPort {
     });
     if (!empresa) return null;
     return new CompanyEntity(empresa.id, empresa.nombre, empresa.codigo_acceso, empresa.fecha_creacion || undefined);
+  }
+
+  async updateCompany(id: number, data: UpdateCompanyInput): Promise<CompanyEntity> {
+    const updatePayload: Record<string, any> = {};
+    if (data.nombre !== undefined) {
+      updatePayload.nombre = data.nombre;
+    }
+    if (data.codigoAcceso !== undefined) {
+      updatePayload.codigo_acceso = data.codigoAcceso;
+    }
+    const updated = await this.prisma.empresas.update({
+      where: { id },
+      data: updatePayload as any,
+    });
+    return new CompanyEntity(
+      updated.id,
+      updated.nombre,
+      (updated as any).codigo_acceso,
+      updated.fecha_creacion || undefined,
+    );
   }
 
   async createCompanyWithAdmin(data: CreateCompanyAndAdminInput) {

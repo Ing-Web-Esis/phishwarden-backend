@@ -1,0 +1,23 @@
+# Tareas de Implementación — Fase 5: M5 — Módulo de Analítica Ejecutiva, Riesgo Organizacional y Reportes
+
+- [x] **T5.1**: Crear las entidades de dominio y tipos puros en `src/analytics/domain/` (`executive-summary.entity.ts`, `department-metrics.entity.ts`, `attack-vector-metrics.entity.ts`, `evolution-metrics.entity.ts`, `featured-users.entity.ts`, `export-user-row.entity.ts`).
+- [x] **T5.2**: Definir la interfaz de puerto `AnalyticsRepositoryPort` y el token de inyección `ANALYTICS_REPOSITORY_PORT` en `src/analytics/application/analytics.repository.port.ts`.
+- [x] **T5.3**: Crear el DTO de validación `src/analytics/infrastructure/analytics-date-range.dto.ts` usando `class-validator` (`@IsOptional()`, `@IsDateString()`) y decoradores de Swagger (`@ApiPropertyOptional`).
+- [x] **T5.4**: Implementar el helper `csv-sanitizer.helper.ts` en `src/analytics/infrastructure/` para escape estándar RFC 4180, prevención estricta de CSV/Formula Injection (prefijando `'` en celdas que inicien con `=`, `+`, `-`, `@`, `\t`, `\r`) y prefijo BOM UTF-8 (`\uFEFF`).
+- [x] **T5.5**: Implementar en `PrismaAnalyticsRepository` (`src/analytics/infrastructure/prisma-analytics.repository.ts`) el método para el resumen ejecutivo (`getExecutiveSummary`), calculando postura de riesgo (`scoreRiesgoPromedio`, distribución `bajo`/`medio`/`critico`), adopción móvil, métricas agregadas de simulaciones (envíos, aperturas, clics, envíos de credenciales, reportes sospechosos) y progreso de capacitación.
+- [x] **T5.6**: Implementar en `PrismaAnalyticsRepository` el método para métricas departamentales (`getDepartmentMetrics`), consolidando colaboradores sin área como `"Sin departamento"` y calculando tasas de vulnerabilidad sin errores de división por cero.
+- [x] **T5.7**: Implementar en `PrismaAnalyticsRepository` el método para métricas por vector de ataque (`getAttackVectorMetrics`) cruzando con `plantillas.metodo_ataque` para los 4 vectores (`phishing`, `smishing`, `vishing`, `ingenieria_social`).
+- [x] **T5.8**: Implementar en `PrismaAnalyticsRepository` el método para la serie temporal de evolución (`getEvolutionMetrics`) calculando métricas mensuales (`YYYY-MM`) para los últimos 6 meses o rango personalizado.
+- [x] **T5.9**: Implementar en `PrismaAnalyticsRepository` el método para usuarios destacados (`getFeaturedUsers`), obteniendo el Top 5 de `mayorRiesgo` (intervención prioritaria) y el Top 5 de `mejoresDefensores` (líderes de seguridad).
+- [x] **T5.10**: Implementar en `PrismaAnalyticsRepository` el método para exportación tabular (`getExportData`), recolectando el histórico consolidado por colaborador activo.
+- [x] **T5.11**: Implementar los 6 casos de uso en `src/analytics/application/`:
+  - `GetExecutiveSummaryUseCase`
+  - `GetDepartmentMetricsUseCase`
+  - `GetAttackVectorMetricsUseCase`
+  - `GetEvolutionMetricsUseCase`
+  - `GetFeaturedUsersUseCase`
+  - `ExportAnalyticsCsvUseCase`
+- [x] **T5.12**: Implementar `AnalyticsController` en `src/analytics/infrastructure/analytics.controller.ts` exponiendo los 6 endpoints bajo `/empresas/:empresaId/analytics` protegidos por `JwtAuthGuard` y `CompanyTenantGuard`, anotaciones OpenAPI/Swagger, `ParseIntPipe` y streaming de archivo CSV con `@Res({ passthrough: true })`.
+- [x] **T5.13**: Crear `AnalyticsModule` en `src/analytics/analytics.module.ts` registrando proveedores, casos de uso y puerto/adaptador, e importarlo dentro de `src/app.module.ts`.
+- [x] **T5.14**: Actualizar `specs/API_CONTRACTS.md` documentando exhaustivamente los 6 contratos de analítica ejecutiva (descripción, seguridad, parámetros de consulta, códigos de error y respuestas JSON/CSV).
+- [x] **T5.15**: Ejecutar `npm run build` en `phishwarden-backend-nj/` verificando 0 errores de TypeScript y confirmar que no se haya modificado ningún archivo del frontend ni código Flutter.
