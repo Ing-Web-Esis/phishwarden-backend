@@ -23,7 +23,13 @@ export class PrismaCompanyRepository implements CompanyRepositoryPort {
       where: { codigo_acceso: code } as any,
     });
     if (!empresa) return null;
-    return new CompanyEntity(empresa.id, empresa.nombre, (empresa as any).codigo_acceso, empresa.fecha_creacion || undefined);
+    return new CompanyEntity(
+      empresa.id,
+      empresa.nombre,
+      empresa.codigo_acceso,
+      empresa.plan || 'professional',
+      empresa.fecha_creacion || undefined,
+    );
   }
 
   async findById(id: number): Promise<CompanyEntity | null> {
@@ -31,7 +37,13 @@ export class PrismaCompanyRepository implements CompanyRepositoryPort {
       where: { id },
     });
     if (!empresa) return null;
-    return new CompanyEntity(empresa.id, empresa.nombre, empresa.codigo_acceso, empresa.fecha_creacion || undefined);
+    return new CompanyEntity(
+      empresa.id,
+      empresa.nombre,
+      empresa.codigo_acceso,
+      empresa.plan || 'professional',
+      empresa.fecha_creacion || undefined,
+    );
   }
 
   async updateCompany(id: number, data: UpdateCompanyInput): Promise<CompanyEntity> {
@@ -42,6 +54,9 @@ export class PrismaCompanyRepository implements CompanyRepositoryPort {
     if (data.codigoAcceso !== undefined) {
       updatePayload.codigo_acceso = data.codigoAcceso;
     }
+    if (data.plan !== undefined) {
+      updatePayload.plan = data.plan;
+    }
     const updated = await this.prisma.empresas.update({
       where: { id },
       data: updatePayload as any,
@@ -49,7 +64,8 @@ export class PrismaCompanyRepository implements CompanyRepositoryPort {
     return new CompanyEntity(
       updated.id,
       updated.nombre,
-      (updated as any).codigo_acceso,
+      updated.codigo_acceso,
+      updated.plan || 'professional',
       updated.fecha_creacion || undefined,
     );
   }
@@ -61,6 +77,7 @@ export class PrismaCompanyRepository implements CompanyRepositoryPort {
         data: {
           nombre: data.companyName,
           codigo_acceso: data.accessCode,
+          plan: data.plan || 'professional',
         } as any,
       });
 
@@ -74,7 +91,13 @@ export class PrismaCompanyRepository implements CompanyRepositoryPort {
       });
 
       return {
-        company: new CompanyEntity(empresa.id, empresa.nombre, (empresa as any).codigo_acceso),
+        company: new CompanyEntity(
+          empresa.id,
+          empresa.nombre,
+          empresa.codigo_acceso,
+          empresa.plan || 'professional',
+          empresa.fecha_creacion || undefined,
+        ),
         admin: {
           id: admin.id,
           name: admin.nombre,

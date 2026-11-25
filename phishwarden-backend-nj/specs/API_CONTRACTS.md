@@ -98,12 +98,29 @@
   "companyName": "TechCorp Perú S.A.C.",
   "adminName": "Carlos Administrador",
   "adminEmail": "carlos.admin@techcorp.com",
-  "password": "AdminPass2026*"
+  "password": "AdminPass2026*",
+  "plan": "professional"
 }
 ```
 
-- **Restricciones:** Email corporativo válido; contraseña mínimo 8 caracteres.
+- **Restricciones:** Email corporativo válido; contraseña mínimo 8 caracteres; plan opcional (`essential` | `professional` | `enterprise`, por defecto `professional`).
 - **Respuesta:** 201 Created.
+  ```json
+  {
+    "message": "Administrador registrado exitosamente.",
+    "empresa": {
+      "id": 1,
+      "nombre": "TechCorp Perú S.A.C.",
+      "codigoAcceso": "PW9X2A81",
+      "plan": "professional"
+    },
+    "administrador": {
+      "id": 1,
+      "nombre": "Carlos Administrador",
+      "correo": "carlos.admin@techcorp.com"
+    }
+  }
+  ```
 - **Errores:** 400 Bad Request; 409 Conflict (correo ya registrado).
 
 ### `GET /empresas/:empresaId`
@@ -111,13 +128,14 @@
 - **Protección:** `JwtAuthGuard`, `CompanyTenantGuard`.
 - **Header:** `Authorization: Bearer <JWT>`
 - **Parámetro de ruta:** `empresaId` (INT, `ParseIntPipe`).
-- **Comportamiento:** Devuelve los datos de la organización del administrador autenticado, exponiendo `codigoAcceso` para compartirlo con los colaboradores que usarán la aplicación móvil.
+- **Comportamiento:** Devuelve los datos de la organización del administrador autenticado, exponiendo `codigoAcceso` para compartirlo con los colaboradores que usarán la aplicación móvil y el plan de suscripción activo.
 - **Respuesta:** 200 OK
   ```json
   {
     "id": 1,
     "nombre": "TechCorp Perú S.A.C.",
     "codigoAcceso": "PW9X2A81",
+    "plan": "professional",
     "fechaCreacion": "2026-10-01T12:00:00.000Z"
   }
   ```

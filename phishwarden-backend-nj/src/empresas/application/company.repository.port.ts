@@ -6,11 +6,13 @@ export interface CreateCompanyAndAdminInput {
   adminName: string;
   adminEmail: string;
   passwordHash: string;
+  plan?: string;
 }
 
 export interface UpdateCompanyInput {
   nombre?: string;
   codigoAcceso?: string;
+  plan?: string;
 }
 
 export interface CompanyRepositoryPort {
