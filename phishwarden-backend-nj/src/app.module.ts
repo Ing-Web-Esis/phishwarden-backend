@@ -12,6 +12,7 @@ import { DepartamentosModule } from './departamentos/departamentos.module';
 import { SimulacionesModule } from './simulaciones/simulaciones.module';
 import { PortalesModule } from './portales/portales.module';
 import { MobileModule } from './mobile/mobile.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { MobileModule } from './mobile/mobile.module';
     SimulacionesModule,
     PortalesModule,
     MobileModule,
+    AnalyticsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

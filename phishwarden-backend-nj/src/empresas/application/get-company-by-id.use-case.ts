@@ -19,6 +19,7 @@ export class GetCompanyByIdUseCase {
       id: company.id,
       nombre: company.name,
       codigoAcceso: company.accessCode,
+      plan: company.plan || 'professional',
       fechaCreacion: company.createdAt,
     };
   }

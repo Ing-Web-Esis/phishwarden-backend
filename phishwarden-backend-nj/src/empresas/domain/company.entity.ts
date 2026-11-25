@@ -3,6 +3,7 @@ export class CompanyEntity {
     public readonly id: number,
     public readonly name: string,
     public readonly accessCode: string,
+    public readonly plan?: string,
     public readonly createdAt?: Date,
   ) {}
 
