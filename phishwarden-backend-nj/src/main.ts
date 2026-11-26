@@ -9,7 +9,7 @@ async function bootstrap() {
 
   const allowedOrigins = (process.env.CORS_ORIGINS ?? '')
     .split(',')
-    .map((origin) => origin.trim())
+    .map((origin) => origin.trim().replace(/^["']|["']$/g, '').replace(/\/+$/, ''))
     .filter(Boolean);
 
   app.enableCors({
@@ -35,10 +35,19 @@ async function bootstrap() {
           originUrl.hostname === '127.0.0.1') &&
         originUrl.protocol === 'http:';
 
-      callback(null, isLocalOrigin || allowedOrigins.includes(requestOrigin));
+      const normalizedRequestOrigin = requestOrigin.replace(/\/+$/, '');
+      const isVercelDomain = originUrl.hostname.endsWith('.vercel.app');
+
+      callback(
+        null,
+        isLocalOrigin ||
+          allowedOrigins.includes(normalizedRequestOrigin) ||
+          isVercelDomain,
+      );
     },
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    credentials: true,
   });
 
   // Habilitar validaciones y transformación automática de tipos globales
