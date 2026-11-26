@@ -98,12 +98,29 @@
   "companyName": "TechCorp Perú S.A.C.",
   "adminName": "Carlos Administrador",
   "adminEmail": "carlos.admin@techcorp.com",
-  "password": "AdminPass2026*"
+  "password": "AdminPass2026*",
+  "plan": "professional"
 }
 ```
 
-- **Restricciones:** Email corporativo válido; contraseña mínimo 8 caracteres.
+- **Restricciones:** Email corporativo válido; contraseña mínimo 8 caracteres; plan opcional (`essential` | `professional` | `enterprise`, por defecto `professional`).
 - **Respuesta:** 201 Created.
+  ```json
+  {
+    "message": "Administrador registrado exitosamente.",
+    "empresa": {
+      "id": 1,
+      "nombre": "TechCorp Perú S.A.C.",
+      "codigoAcceso": "PW9X2A81",
+      "plan": "professional"
+    },
+    "administrador": {
+      "id": 1,
+      "nombre": "Carlos Administrador",
+      "correo": "carlos.admin@techcorp.com"
+    }
+  }
+  ```
 - **Errores:** 400 Bad Request; 409 Conflict (correo ya registrado).
 
 ### `GET /empresas/:empresaId`
@@ -111,7 +128,31 @@
 - **Protección:** `JwtAuthGuard`, `CompanyTenantGuard`.
 - **Header:** `Authorization: Bearer <JWT>`
 - **Parámetro de ruta:** `empresaId` (INT, `ParseIntPipe`).
-- **Comportamiento:** Devuelve los datos de la organización del administrador autenticado, exponiendo `codigoAcceso` para compartirlo con los colaboradores que usarán la aplicación móvil.
+- **Comportamiento:** Devuelve los datos de la organización del administrador autenticado, exponiendo `codigoAcceso` para compartirlo con los colaboradores que usarán la aplicación móvil y el plan de suscripción activo.
+- **Respuesta:** 200 OK
+  ```json
+  {
+    "id": 1,
+    "nombre": "TechCorp Perú S.A.C.",
+    "codigoAcceso": "PW9X2A81",
+    "plan": "professional",
+    "fechaCreacion": "2026-10-01T12:00:00.000Z"
+  }
+  ```
+- **Errores:** 401 Unauthorized; 403 Forbidden (organización ajena o token de empleado); 404 Not Found.
+
+### `PATCH /empresas/:empresaId`
+
+- **Protección:** `JwtAuthGuard`, `CompanyTenantGuard`.
+- **Header:** `Authorization: Bearer <JWT>`
+- **Parámetro de ruta:** `empresaId` (INT, `ParseIntPipe`).
+- **Payload:** `UpdateCompanyDto`
+  ```json
+  {
+    "nombre": "TechCorp Perú S.A.C."
+  }
+  ```
+- **Comportamiento:** Actualiza el nombre corporativo de la organización perteneciente al administrador autenticado.
 - **Respuesta:** 200 OK
   ```json
   {
@@ -121,7 +162,25 @@
     "fechaCreacion": "2026-10-01T12:00:00.000Z"
   }
   ```
-- **Errores:** 401 Unauthorized; 403 Forbidden (organización ajena o token de empleado); 404 Not Found.
+- **Errores:** 400 Bad Request; 401 Unauthorized; 403 Forbidden; 404 Not Found.
+
+### `POST /empresas/:empresaId/regenerar-codigo`
+
+- **Protección:** `JwtAuthGuard`, `CompanyTenantGuard`.
+- **Header:** `Authorization: Bearer <JWT>`
+- **Parámetro de ruta:** `empresaId` (INT, `ParseIntPipe`).
+- **Payload:** Ninguno.
+- **Comportamiento:** Genera un nuevo código alfanumérico institucional único de 8 caracteres (`PWXXXXXX`) y lo actualiza en base de datos.
+- **Respuesta:** 200 OK
+  ```json
+  {
+    "id": 1,
+    "nombre": "TechCorp Perú S.A.C.",
+    "codigoAcceso": "PW8Y9K23",
+    "mensaje": "Código de acceso regenerado exitosamente"
+  }
+  ```
+- **Errores:** 401 Unauthorized; 403 Forbidden; 404 Not Found.
 
 ---
 
@@ -1304,3 +1363,247 @@ Endpoints diseñados para la aplicación móvil Flutter utilizada por los colabo
   }
   ```
 - **Errores:** 401 Unauthorized; 403 Forbidden.
+
+
+---
+
+## Analítica Ejecutiva y Reportes (Fase 5 M5)
+
+Endpoints administrativos para visualización de postura global de riesgo, rendimiento de campañas, adopción móvil, susceptibilidad por departamentos y vectores de ataque, evolución mensual y exportación de reportes ejecutivos en CSV.
+
+Todos los endpoints están protegidos por `JwtAuthGuard` y `CompanyTenantGuard`, restringiendo el acceso exclusivamente a administradores web autenticados de la organización correspondiente a `:empresaId`.
+
+### `GET /empresas/:empresaId/analytics/resumen`
+
+- **Protección:** `JwtAuthGuard`, `CompanyTenantGuard`.
+- **Header:** `Authorization: Bearer <JWT>`
+- **Parámetros de Ruta:**
+  - `empresaId` (int, obligatorio): ID numérico de la empresa.
+- **Parámetros de Consulta (Opcionales):**
+  - `desde` (string, opcional): Fecha de inicio del filtro (`YYYY-MM-DD`).
+  - `hasta` (string, opcional): Fecha de fin del filtro (`YYYY-MM-DD`).
+- **Respuesta:** 200 OK
+  ```json
+  {
+    "posturaRiesgo": {
+      "scoreRiesgoPromedio": 18.5,
+      "nivelRiesgoGlobal": "bajo",
+      "distribucion": {
+        "bajo": 42,
+        "medio": 8,
+        "critico": 2
+      }
+    },
+    "adopcionMovil": {
+      "totalColaboradores": 52,
+      "colaboradoresVinculados": 45,
+      "tasaAdopcion": 86.5
+    },
+    "metricasSimulaciones": {
+      "totalCampanas": 6,
+      "totalEnvios": 280,
+      "totalAperturas": 210,
+      "totalClics": 35,
+      "totalEnviosCredenciales": 12,
+      "totalReportes": 68,
+      "tasaApertura": 75.0,
+      "tasaClic": 12.5,
+      "tasaCompromisoCredenciales": 4.3,
+      "tasaReporteTemprano": 24.3
+    },
+    "metricasCapacitacion": {
+      "totalLeccionesCompletadas": 145,
+      "totalLeccionesPendientes": 22,
+      "totalLeccionesReprobadas": 15,
+      "tasaAprobacion": 90.6
+    }
+  }
+  ```
+- **Errores:** 400 Bad Request (fechas inválidas o `desde > hasta`); 401 Unauthorized; 403 Forbidden.
+
+### `GET /empresas/:empresaId/analytics/departamentos`
+
+- **Protección:** `JwtAuthGuard`, `CompanyTenantGuard`.
+- **Header:** `Authorization: Bearer <JWT>`
+- **Parámetros de Ruta:**
+  - `empresaId` (int, obligatorio): ID numérico de la empresa.
+- **Parámetros de Consulta (Opcionales):**
+  - `desde` (string, opcional): `YYYY-MM-DD`.
+  - `hasta` (string, opcional): `YYYY-MM-DD`.
+- **Comportamiento:** Devuelve el desglose comparativo de riesgo agrupado por área, consolidando colaboradores sin área como `"Sin departamento"` y ordenado por `scoreRiesgoPromedio DESC`, `totalColaboradores DESC` y `departamento ASC`.
+- **Respuesta:** 200 OK
+  ```json
+  [
+    {
+      "departamentoId": 2,
+      "departamento": "Finanzas",
+      "totalColaboradores": 12,
+      "scoreRiesgoPromedio": 38.5,
+      "nivelRiesgo": "medio",
+      "simulacionesRecibidas": 48,
+      "clicsEnSimulacion": 9,
+      "credencialesComprometidas": 3,
+      "tasaVulnerabilidad": 25.0,
+      "reportesRealizados": 6,
+      "leccionesCompletadas": 18
+    },
+    {
+      "departamentoId": 1,
+      "departamento": "Tecnología",
+      "totalColaboradores": 20,
+      "scoreRiesgoPromedio": 10.2,
+      "nivelRiesgo": "bajo",
+      "simulacionesRecibidas": 100,
+      "clicsEnSimulacion": 4,
+      "credencialesComprometidas": 1,
+      "tasaVulnerabilidad": 5.0,
+      "reportesRealizados": 35,
+      "leccionesCompletadas": 55
+    }
+  ]
+  ```
+- **Errores:** 400 Bad Request; 401 Unauthorized; 403 Forbidden.
+
+### `GET /empresas/:empresaId/analytics/vectores`
+
+- **Protección:** `JwtAuthGuard`, `CompanyTenantGuard`.
+- **Header:** `Authorization: Bearer <JWT>`
+- **Parámetros de Ruta:**
+  - `empresaId` (int, obligatorio): ID numérico de la empresa.
+- **Parámetros de Consulta (Opcionales):**
+  - `desde` (string, opcional): `YYYY-MM-DD`.
+  - `hasta` (string, opcional): `YYYY-MM-DD`.
+- **Comportamiento:** Retorna la efectividad y susceptibilidad ante los 4 vectores predefinidos (`phishing`, `smishing`, `vishing`, `ingenieria_social`).
+- **Respuesta:** 200 OK
+  ```json
+  [
+    {
+      "metodoAtaque": "phishing",
+      "totalEnvios": 150,
+      "totalClics": 22,
+      "totalEnviosCredenciales": 8,
+      "tasaClic": 14.7,
+      "tasaCompromiso": 5.3
+    },
+    {
+      "metodoAtaque": "smishing",
+      "totalEnvios": 60,
+      "totalClics": 8,
+      "totalEnviosCredenciales": 3,
+      "tasaClic": 13.3,
+      "tasaCompromiso": 5.0
+    },
+    {
+      "metodoAtaque": "vishing",
+      "totalEnvios": 40,
+      "totalClics": 3,
+      "totalEnviosCredenciales": 1,
+      "tasaClic": 7.5,
+      "tasaCompromiso": 2.5
+    },
+    {
+      "metodoAtaque": "ingenieria_social",
+      "totalEnvios": 30,
+      "totalClics": 2,
+      "totalEnviosCredenciales": 0,
+      "tasaClic": 6.7,
+      "tasaCompromiso": 0.0
+    }
+  ]
+  ```
+- **Errores:** 400 Bad Request; 401 Unauthorized; 403 Forbidden.
+
+### `GET /empresas/:empresaId/analytics/evolucion`
+
+- **Protección:** `JwtAuthGuard`, `CompanyTenantGuard`.
+- **Header:** `Authorization: Bearer <JWT>`
+- **Parámetros de Ruta:**
+  - `empresaId` (int, obligatorio): ID numérico de la empresa.
+- **Parámetros de Consulta (Opcionales):**
+  - `desde` (string, opcional): `YYYY-MM-DD`.
+  - `hasta` (string, opcional): `YYYY-MM-DD`.
+- **Comportamiento:** Retorna la serie temporal mensual (últimos 6 meses por defecto o rango especificado) de actividad simulada, incidentes y capacitación.
+- **Respuesta:** 200 OK
+  ```json
+  [
+    {
+      "periodo": "2026-06",
+      "simulacionesEnviadas": 45,
+      "incidentesSimulacion": 12,
+      "reportesSospechosos": 5,
+      "leccionesCompletadas": 18
+    },
+    {
+      "periodo": "2026-07",
+      "simulacionesEnviadas": 50,
+      "incidentesSimulacion": 9,
+      "reportesSospechosos": 8,
+      "leccionesCompletadas": 24
+    }
+  ]
+  ```
+- **Errores:** 400 Bad Request; 401 Unauthorized; 403 Forbidden.
+
+### `GET /empresas/:empresaId/analytics/usuarios-destacados`
+
+- **Protección:** `JwtAuthGuard`, `CompanyTenantGuard`.
+- **Header:** `Authorization: Bearer <JWT>`
+- **Parámetros de Ruta:**
+  - `empresaId` (int, obligatorio): ID numérico de la empresa.
+- **Parámetros de Consulta (Opcionales):**
+  - `desde` (string, opcional): `YYYY-MM-DD`.
+  - `hasta` (string, opcional): `YYYY-MM-DD`.
+- **Comportamiento:** Retorna dos listas acotadas (Top 5) de colaboradores activos: `mayorRiesgo` (ordenado por score de riesgo DESC, fallos DESC y nombre ASC para intervención prioritaria) y `mejoresDefensores` (ordenado por puntos acumulados DESC, reportes DESC, score de riesgo ASC y nombre ASC).
+- **Respuesta:** 200 OK
+  ```json
+  {
+    "mayorRiesgo": [
+      {
+        "id": "e4b1c2a0-1234-4567-89ab-cdef01234567",
+        "nombre": "Juan Pérez",
+        "correo": "juan.perez@empresa.com",
+        "departamento": "Finanzas",
+        "scoreRiesgo": 85,
+        "nivelRiesgo": "critico",
+        "simulacionesFallidas": 4
+      }
+    ],
+    "mejoresDefensores": [
+      {
+        "id": "a1b2c3d4-5678-90ab-cdef-1234567890ab",
+        "nombre": "Ana Gómez",
+        "correo": "ana.gomez@empresa.com",
+        "departamento": "Tecnología",
+        "puntosCapacitacion": 120,
+        "reportesRealizados": 9,
+        "scoreRiesgo": 0,
+        "rachaDiasSeguros": 45
+      }
+    ]
+  }
+  ```
+- **Errores:** 400 Bad Request; 401 Unauthorized; 403 Forbidden.
+
+### `GET /empresas/:empresaId/analytics/exportar`
+
+- **Protección:** `JwtAuthGuard`, `CompanyTenantGuard`.
+- **Header:** `Authorization: Bearer <JWT>`
+- **Parámetros de Ruta:**
+  - `empresaId` (int, obligatorio): ID numérico de la empresa.
+- **Parámetros de Consulta (Opcionales):**
+  - `desde` (string, opcional): `YYYY-MM-DD`.
+  - `hasta` (string, opcional): `YYYY-MM-DD`.
+- **Cabeceras de Respuesta:**
+  - `Content-Type: text/csv; charset=utf-8`
+  - `Content-Disposition: attachment; filename="reporte-phishwarden-empresa-{empresaId}.csv"`
+- **Comportamiento y Seguridad:**
+  - Genera el reporte consolidado por colaborador activo en formato CSV estándar RFC 4180.
+  - Incluye el prefijo Byte Order Mark UTF-8 (`\uFEFF`) para compatibilidad nativa con caracteres especiales y tildes en Microsoft Excel.
+  - Aplica protección contra Inyección de Fórmulas (CSV Injection): antepone un apóstrofe (`'`) a cualquier celda de texto que comience con `=`, `+`, `-`, `@`, `\t` o `\r`.
+- **Respuesta:** 200 OK (Descarga de archivo CSV)
+  ```csv
+  "ID Colaborador","Nombre","Correo Electrónico","Departamento","Score de Riesgo","Nivel de Riesgo","Simulaciones Recibidas","Clics en Enlace","Credenciales Comprometidas","Reportes Sospechosos","Lecciones Completadas","Puntos Acumulados","Estado App Móvil"
+  "e4b1c2a0-1234-4567-89ab-cdef01234567","Juan Pérez","juan.perez@empresa.com","Finanzas",85,"critico",4,3,1,0,1,10,"Vinculado"
+  "a1b2c3d4-5678-90ab-cdef-1234567890ab","Ana Gómez","ana.gomez@empresa.com","Tecnología",0,"bajo",6,0,0,9,5,120,"Vinculado"
+  ```
+- **Errores:** 400 Bad Request; 401 Unauthorized; 403 Forbidden.

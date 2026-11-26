@@ -50,6 +50,7 @@ model empresas {
   id              Int               @id @default(autoincrement())
   nombre          String            @db.VarChar(150)
   codigo_acceso   String            @unique @db.VarChar(20)
+  plan            String?           @default("professional") @db.VarChar(30)
   fecha_creacion  DateTime?         @default(now()) @db.Timestamptz(6)
   administradores administradores[]
   departamentos   departamentos[]

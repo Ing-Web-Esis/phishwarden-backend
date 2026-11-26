@@ -9,6 +9,7 @@ export interface RegisterCompanyCommand {
   adminName: string;
   adminEmail: string;
   password: string;
+  plan?: string;
 }
 
 @Injectable()
@@ -48,12 +49,15 @@ export class RegisterCompanyUseCase {
     const passwordHash = await bcrypt.hash(command.password, saltRounds);
 
     // 4. Crear la empresa y el administrador en una sola transacción atómica
+    const planNormalized = command.plan ? command.plan.toLowerCase().trim() : 'professional';
+
     const result = await this.companyRepository.createCompanyWithAdmin({
       companyName: command.companyName,
       accessCode,
       adminName: command.adminName,
       adminEmail: command.adminEmail,
       passwordHash,
+      plan: planNormalized,
     });
 
     return {
@@ -62,6 +66,7 @@ export class RegisterCompanyUseCase {
         id: result.company.id,
         nombre: result.company.name,
         codigoAcceso: result.company.accessCode,
+        plan: result.company.plan || planNormalized,
       },
       administrador: {
         id: result.admin.id,
